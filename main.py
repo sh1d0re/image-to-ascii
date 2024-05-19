@@ -14,22 +14,11 @@ os.system("clear")
 for c in range(resolution):
     for d in range(resolution):
         a, b, prebrightness = str(int(w/resolution)*d), str(int(h/resolution)*c), prebrightness + int(img.getpixel((int(a),int(b)))[0])+int(img.getpixel((int(a),int(b)))[1])+int(img.getpixel((int(a),int(b)))[2])/3
-        if prebrightness//3 <= 5: resulttxt+=" "
-        elif prebrightness//3 <= 20: resulttxt+="."
-        elif prebrightness//3 <= 40: resulttxt+=":"
-        elif prebrightness//3 <= 60: resulttxt+=";"
-        elif prebrightness//3 <= 80: resulttxt+="^"
-        elif prebrightness//3 <= 100: resulttxt+="-"
-        elif prebrightness//3 <= 120: resulttxt+="~"
-        elif prebrightness//3 <= 140: resulttxt+=">"
-        elif prebrightness//3 <= 160: resulttxt+="+"
-        elif prebrightness//3 <= 180: resulttxt+="*"
-        elif prebrightness//3 <= 200: resulttxt+="%"
-        elif prebrightness//3 <= 220: resulttxt+="¥"
-        elif prebrightness//3 <= 240: resulttxt+="$"
-        elif prebrightness//3 <= 245: resulttxt+="@"
-        elif prebrightness//3 <= 255: resulttxt+="#"
-        resulttxt+="  "
+        fillcharacters=["  ","..",".,",",,",",-","--","~~","::",":;",";;",";/","//","~~","~>",">>",">+","++","+*","**","*&","&&","$&","$$","$%","%%","%@","@@","@#","##",]
+        for e in range(len(fillcharacters)):
+            if prebrightness//3 <= 10*(e+1):
+                resulttxt+=fillcharacters[e]
+                break
         prebrightness = 0
     resulttxt+="\n"   
 print(resulttxt+"\n\n=========================\nPRINTED ASCII-ART\n=========================")
