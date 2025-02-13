@@ -1,0 +1,7 @@
+{
+    "$comment": "If you are willing to configure this program, please refer to the README.md file to prevent any bugs.",
+
+    "brightnessWeight": "BT.601",  
+    "fillCharacters": ["  ", "..", ".:", ":;", ";;", "==", "**", "*$", "$$", "@@", "##"],
+    "splitter": " "
+}
