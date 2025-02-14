@@ -18,6 +18,7 @@ try:
     config = json.load(open(os.path.expanduser("~/.config/image-to-ascii/config.json")))
 except Exception as e:
     print("Using default configurations. This is caused by the following errors:\n"+str(e))
+    exit
 
 filename = str(sys.argv[1])
 img = Image.open(filename)
@@ -55,11 +56,11 @@ allBrightnessWeights = {
 }
 
 def setResolutionToFit():
-    if terminalColumnLinesRatio <= imageHeightWidthRatio:
+    if round((lines/height) * width) >= (column // (maximumLengthOfAFillCharacter + len(splitter))):
         resolution = column // (maximumLengthOfAFillCharacter + len(splitter))
     else:
         resolution = (lines/height) * width 
-    return(round(resolution) - 1)
+    return(round(resolution))
 
 resolution = setResolutionToFit()
 heightChunkMargin = round(height / (resolution * (height/width)))
