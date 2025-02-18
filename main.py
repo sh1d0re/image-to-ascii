@@ -23,7 +23,7 @@ except Exception as e:
 
 if len(sys.argv) == 1:
     print("Image-to-ascii: Provide an image file name to operate.")
-    exit
+    exit()
 
 filename = str(sys.argv[1])
 img = Image.open(filename)
