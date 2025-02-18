@@ -20,6 +20,9 @@ try:
     config = json.load(open(os.path.expanduser("~/.config/image-to-ascii/config.json")))
 except Exception as e:
     print("Using default configurations. This is caused by the following errors:\n"+str(e))
+
+if len(sys.argv) == 1:
+    print("Image-to-ascii: Provide an image file name to operate.")
     exit
 
 filename = str(sys.argv[1])
