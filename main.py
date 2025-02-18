@@ -2,8 +2,8 @@ import os
 import sys
 import json
 
+from PIL import Image
 try:
-    from PIL import Image
     print("["+"\x1b[32;1m"+"✔︎"+"\x1b[0m"+"] Successfully imported PIL (pillow)")
 except ImportError:
     if input("Would you like to install pillow? [Y/N]: ").lower() == "y":
@@ -93,6 +93,7 @@ def convertRGBToLuma(red, green, blue, selectedBrightnessWeights = "BT.601"): # 
 
 def getChunkAverageColor(resolutionWidth, resolutionHeight):
     global heightChunkMargin, widthChunkMargin
+    chunkAverage = []
     colors = [[], [], []]
     for x in range(5):
         xStartPoint = (widthChunkMargin * resolutionWidth) - 2
@@ -105,15 +106,15 @@ def getChunkAverageColor(resolutionWidth, resolutionHeight):
                 colors[2].append(pixelDetail[2]) # Blue
             except:
                 pass
-    if not colors == [[], [], []]:
+    if (len(colors[0])+len(colors[1])+len(colors[2])) == 0:
+        chunkAverage = None
+    else:
         chunkAverage = [
             round(sum(colors[0]) / len(colors[0])),
             round(sum(colors[1]) / len(colors[1])),
             round(sum(colors[2]) / len(colors[2]))
         ]
-        return(chunkAverage)
-    else:
-        return(None)
+    return(chunkAverage)
     
 def getChunkAverageASCII(resolutionWidth, resolutionHeight):
     global heightChunkMargin, widthChunkMargin
@@ -125,9 +126,10 @@ def getChunkAverageASCII(resolutionWidth, resolutionHeight):
             try:
                 pixelDetail = img.getpixel((x + xStartPoint, y + yStartPoint))
                 colors.append(convertRGBToLuma(
-                    pixelDetail[0], # Red
-                    pixelDetail[1], # Blue
-                    pixelDetail[2]  # Green
+                    red = pixelDetail[0],
+                    green = pixelDetail[1],
+                    blue = pixelDetail[2],
+                    selectedBrightnessWeights = config["brightnessWeight"]
                 ))
             except:
                 pass
@@ -162,8 +164,26 @@ for resolutionHeight in range(round(resolution*imageHeightWidthRatio) - 1):
                         break
                     if e == len(fillCharacters) - 1:
                         resulttxt += fillCharacters[-1] + splitter
+
         elif colorMode == "True":
-            chunkBrightness = getChunkAverageColor(resolutionWidth, resolutionHeight)
-            if not chunkBrightness == None:
-                resulttxt += f"\x1b[48;2;{chunkBrightness[0]};{chunkBrightness[1]};{chunkBrightness[2]}m\x1b[38;2;{chunkBrightness[0]};{chunkBrightness[1]};{chunkBrightness[2]}m{fillCharacters[0] + splitter}\x1b[0m"
+            chunkRGB = getChunkAverageColor(resolutionWidth, resolutionHeight)
+            if not chunkRGB == None:
+                resulttxt += f"\x1b[48;2;{chunkRGB[0]};{chunkRGB[1]};{chunkRGB[2]}m{fillCharacters[0] + splitter}\x1b[0m"
+            
+        elif colorMode == "Mixed":
+            chunkRGB = getChunkAverageColor(resolutionWidth, resolutionHeight)
+            if not chunkRGB == None:
+                chunkBrightness = convertRGBToLuma(
+                    red = chunkRGB[0],
+                    green = chunkRGB[1],
+                    blue = chunkRGB[2],
+                    selectedBrightnessWeights = config["brightnessWeight"]
+                )
+                for e in range(len(fillCharacters)):
+                    if not((fillCharactersBrightnessMargin * e) < chunkBrightness):
+                        resulttxt += f"\x1b[48;2;{chunkRGB[0]};{chunkRGB[1]};{chunkRGB[2]}m{fillCharacters[e] + splitter}\x1b[0m"
+                        break
+                    if e == len(fillCharacters) - 1:
+                        resulttxt += f"\x1b[48;2;{chunkRGB[0]};{chunkRGB[1]};{chunkRGB[2]}m{fillCharacters[-1] + splitter}\x1b[0m"
+
     print(resulttxt)
