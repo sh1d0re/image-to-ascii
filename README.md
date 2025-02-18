@@ -7,6 +7,8 @@ A compiled Python script that transfers image into text (ASCII).
 - Python (3 or above)
 - Pillow (11.0.0 or above)
 
+<img src="">
+
 ## Installation
 #### [1] Download image-to-ascii from github
 ```shell

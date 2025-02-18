@@ -3,5 +3,7 @@
 
     "brightnessWeight": "BT.601",  
     "fillCharacters": ["  ", "..", ".:", ":;", ";;", "==", "**", "*$", "$$", "@@", "##"],
-    "splitter": " "
+    "splitter": " ",
+    "colorMode": "True",
+    "fitMode": "auto"
 }

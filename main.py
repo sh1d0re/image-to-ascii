@@ -1,4 +1,6 @@
-import os, sys, json
+import os
+import sys
+import json
 
 try:
     from PIL import Image
@@ -25,6 +27,7 @@ img = Image.open(filename)
 fillCharacters = config["fillCharacters"]
 maximumLengthOfAFillCharacter = max([len(i) for i in fillCharacters])
 splitter = config["splitter"]
+colorMode = config["colorMode"]
 
 width, height = img.size[0], img.size[1]
 imageHeightWidthRatio = (height/width)
@@ -55,14 +58,17 @@ allBrightnessWeights = {
     ]
 }
 
-def setResolutionToFit():
-    if round((lines/height) * width) >= (column // (maximumLengthOfAFillCharacter + len(splitter))):
+def setResolutionToFit(fitMode = "auto"):
+    if fitMode == "column":
         resolution = column // (maximumLengthOfAFillCharacter + len(splitter))
-    else:
-        resolution = (lines/height) * width 
+    elif fitMode == "auto":
+        if round((lines/height) * width) >= (column // (maximumLengthOfAFillCharacter + len(splitter))):
+            resolution = column // (maximumLengthOfAFillCharacter + len(splitter))
+        else:
+            resolution = (lines/height) * width
     return(round(resolution))
 
-resolution = setResolutionToFit()
+resolution = setResolutionToFit(config["fitMode"])
 heightChunkMargin = round(height / (resolution * (height/width)))
 widthChunkMargin = round(width / (resolution))
 
@@ -82,7 +88,31 @@ def convertRGBToLuma(red, green, blue, selectedBrightnessWeights = "BT.601"): # 
     ]) / 3
     return(luma)
 
-def getChunkAverage(resolutionWidth, resolutionHeight):
+def getChunkAverageColor(resolutionWidth, resolutionHeight):
+    global heightChunkMargin, widthChunkMargin
+    colors = [[], [], []]
+    for x in range(5):
+        xStartPoint = (widthChunkMargin * resolutionWidth) - 2
+        for y in range(5):
+            yStartPoint = (heightChunkMargin * resolutionHeight) - 2
+            try:
+                pixelDetail = img.getpixel((x + xStartPoint, y + yStartPoint))
+                colors[0].append(pixelDetail[0]) # Red
+                colors[1].append(pixelDetail[1]) # Green
+                colors[2].append(pixelDetail[2]) # Blue
+            except:
+                pass
+    if not colors == [[], [], []]:
+        chunkAverage = [
+            round(sum(colors[0]) / len(colors[0])),
+            round(sum(colors[1]) / len(colors[1])),
+            round(sum(colors[2]) / len(colors[2]))
+        ]
+        return(chunkAverage)
+    else:
+        return(None)
+    
+def getChunkAverageASCII(resolutionWidth, resolutionHeight):
     global heightChunkMargin, widthChunkMargin
     colors = []
     for x in range(5):
@@ -120,12 +150,17 @@ fillCharactersBrightnessMargin = 255 / len(fillCharacters)
 for resolutionHeight in range(round(resolution*imageHeightWidthRatio) - 1):
     resulttxt = ""
     for resolutionWidth in range(int(resolution) - 1):
-        chunkBrightness = getChunkAverage(resolutionWidth, resolutionHeight)
-        if not chunkBrightness == None:
-            for e in range(len(fillCharacters)):
-                if not((fillCharactersBrightnessMargin * e) < chunkBrightness):
-                    resulttxt += fillCharacters[e] + splitter
-                    break
-                if e == len(fillCharacters) - 1:
-                    resulttxt += fillCharacters[-1] + splitter
+        if colorMode == "False":
+            chunkBrightness = getChunkAverageASCII(resolutionWidth, resolutionHeight)
+            if not chunkBrightness == None:
+                for e in range(len(fillCharacters)):
+                    if not((fillCharactersBrightnessMargin * e) < chunkBrightness):
+                        resulttxt += fillCharacters[e] + splitter
+                        break
+                    if e == len(fillCharacters) - 1:
+                        resulttxt += fillCharacters[-1] + splitter
+        elif colorMode == "True":
+            chunkBrightness = getChunkAverageColor(resolutionWidth, resolutionHeight)
+            if not chunkBrightness == None:
+                resulttxt += f"\x1b[48;2;{chunkBrightness[0]};{chunkBrightness[1]};{chunkBrightness[2]}m\x1b[38;2;{chunkBrightness[0]};{chunkBrightness[1]};{chunkBrightness[2]}m{fillCharacters[0] + splitter}\x1b[0m"
     print(resulttxt)
