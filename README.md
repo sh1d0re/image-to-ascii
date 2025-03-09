@@ -10,9 +10,10 @@ A compiled Python script that transfers image into text (ASCII).
 <img src="">
 
 ## Installation
-#### [1] Download image-to-ascii from github
+#### [1] Download image-to-ascii from github and cd into it.
 ```shell
 git clone https://github.com/sh1d0re/image-to-ascii
+cd image-to-ascii
 ```
 
 #### [2] Choose your operating OS (macOS or Linux), and rename it to `ita`.
